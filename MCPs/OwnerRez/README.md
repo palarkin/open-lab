@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/30923715/README.md)
 # OwnerRez MCP Server
 
 An MCP server that exposes the OwnerRez API v2 (plus genuine owner statements and messaging) to
