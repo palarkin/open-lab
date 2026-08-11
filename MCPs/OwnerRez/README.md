@@ -102,6 +102,53 @@ That's it — you're done.
 
 ---
 
+## Optional — turn on guest messaging (advanced)
+
+Everything above works with your regular key. **Guest messaging** (reading and sending messages to
+guests) needs one extra thing: an OwnerRez "OAuth app." It's more involved — set aside about 15 extra
+minutes. If you don't need messaging, skip this section entirely.
+
+### A) Create the OAuth app in OwnerRez
+
+1. In OwnerRez, go to **Settings → Advanced Tools → Developer/API Settings** and click **Create App**.
+2. Fill it in like this. The web addresses can be exactly these — they just have to be real
+   addresses, **not** "localhost":
+   - **Name:** `Claude`
+   - **Homepage URL:** `https://example.com`
+   - **OAuth Redirect URL:** `https://example.com/callback`
+   - **OAuth API scope:** `Full read and write`
+   - **Token expiration policy:** `None – tokens do not expire`
+   - **Webhook URL:** `https://example.com/webhook` (leave Webhook User/Password blank)
+3. Save it, then copy the **Client ID** (starts with `c_`) and the **Client Secret** (starts with
+   `s_`). The secret is shown only once — copy it now.
+4. Open the **Users** tab and click **Grant Access To Me**.
+
+### B) Get your messaging token
+
+1. Open this web address in your browser — **replace `YOUR_CLIENT_ID`** with your Client ID:
+   ```
+   https://app.ownerrez.com/oauth/authorize?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=https://example.com/callback&scope=full&state=x
+   ```
+2. Click to approve. Your browser jumps to a page like `https://example.com/callback?code=tc_...`.
+   The page itself doesn't matter — look at the **address bar** and copy the part after `code=`
+   (it starts with `tc_`).
+3. Back in your Terminal (in the same folder), paste this — filling in your Client ID, Client Secret,
+   and the `tc_` code — then press Enter:
+   ```bash
+   node oauth-setup.mjs YOUR_CLIENT_ID YOUR_CLIENT_SECRET YOUR_CODE https://example.com/callback
+   ```
+   Do this within 10 minutes of step 1 (the code expires quickly). It saves the token into your
+   `.env` file automatically.
+
+### C) Restart
+
+Fully quit and reopen Claude. Guest messaging is now on. ✅
+
+> **Tip:** keep `https://example.com/callback` **identical** everywhere — in the app settings, in the
+> web address in B1, and in the command in B3. They must match exactly.
+
+---
+
 ## If something goes wrong
 
 - **`node` or `git` "command not found"** → Node.js (or Git) isn't installed. Install Node.js from
@@ -117,8 +164,8 @@ That's it — you're done.
   shared.
 - Anything that would *change* your data (like updating a rate) always asks you to confirm first —
   it won't change anything on its own.
-- **Guest messaging** needs a bit of extra setup (an OwnerRez "OAuth app"); everything else works
-  with just the key above. See `BLUEPRINT.md` if you want the details.
+- **Guest messaging** needs one extra setup step (an OwnerRez "OAuth app"). Everything else works
+  with just the key above — see the optional messaging section above to turn it on.
 
 ## For developers
 
