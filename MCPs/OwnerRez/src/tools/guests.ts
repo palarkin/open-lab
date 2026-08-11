@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { orRequest, orPaged, formatResponse, handleError } from "../services/ownerrez-client.js";
+import { WRITE, gated } from "./_util.js";
 
 const READ = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true };
 
@@ -51,6 +52,49 @@ export function registerGuestTools(server: McpServer) {
       } catch (e) {
         return { content: [{ type: "text", text: handleError(e) }] };
       }
+    }
+  );
+
+  // WRITE — create a guest. Previews unless confirm=true.
+  server.registerTool(
+    "ownerrez_create_guest",
+    {
+      title: "Create Guest",
+      description:
+        "Create a guest record. Provide first_name/last_name/notes directly; use `fields` for advanced " +
+        "properties (email_addresses[], phones[], addresses[], tags[]). Previews unless confirm=true.",
+      inputSchema: {
+        first_name: z.string().optional(),
+        last_name: z.string().optional(),
+        notes: z.string().optional(),
+        fields: z.record(z.any()).optional().describe("Extra guest fields to merge, e.g. {\"email_addresses\":[...]}."),
+        confirm: z.boolean().optional(),
+      },
+      annotations: WRITE,
+    },
+    async ({ first_name, last_name, notes, fields, confirm }) => {
+      const body = { ...(fields ?? {}), ...(first_name !== undefined ? { first_name } : {}), ...(last_name !== undefined ? { last_name } : {}), ...(notes !== undefined ? { notes } : {}) };
+      return gated(confirm, `Would create a guest:\n${formatResponse(body)}`, async () => {
+        const data = await orRequest("post", "/guests", { data: body });
+        return `Guest created.\n${formatResponse(data)}`;
+      });
+    }
+  );
+
+  // WRITE — update a guest (partial). Previews unless confirm=true.
+  server.registerTool(
+    "ownerrez_update_guest",
+    {
+      title: "Update Guest",
+      description: "Update fields on an existing guest (e.g. first_name, last_name, notes). Previews unless confirm=true.",
+      inputSchema: { id: z.number().int(), fields: z.record(z.any()).describe("Object of guest fields to change."), confirm: z.boolean().optional() },
+      annotations: WRITE,
+    },
+    async ({ id, fields, confirm }) => {
+      return gated(confirm, `Would PATCH guest ${id} with:\n${formatResponse(fields)}`, async () => {
+        const data = await orRequest("patch", `/guests/${id}`, { data: fields });
+        return `Guest ${id} updated.\n${formatResponse(data)}`;
+      });
     }
   );
 }

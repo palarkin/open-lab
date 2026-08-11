@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { orRequest, orPaged, getPropertiesCached, formatResponse, handleError } from "../services/ownerrez-client.js";
 import { bucketSchedule, zDate, day } from "../logic.js";
+import { WRITE, gated } from "./_util.js";
 
 const READ = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true };
 const guestName = (b: any) => {
@@ -62,6 +63,27 @@ export function registerBookingTools(server: McpServer) {
       } catch (e) {
         return { content: [{ type: "text", text: handleError(e) }] };
       }
+    }
+  );
+
+  // WRITE — update fields on a booking (partial). Previews unless confirm=true.
+  server.registerTool(
+    "ownerrez_update_booking",
+    {
+      title: "Update Booking",
+      description: "Change fields on an existing booking (e.g. notes, arrival, departure, status). Previews unless confirm=true.",
+      inputSchema: {
+        id: z.number().int(),
+        fields: z.record(z.any()).describe("Object of booking fields to change, e.g. {\"notes\":\"...\"}."),
+        confirm: z.boolean().optional(),
+      },
+      annotations: WRITE,
+    },
+    async ({ id, fields, confirm }) => {
+      return gated(confirm, `Would PATCH booking ${id} with:\n${formatResponse(fields)}`, async () => {
+        const data = await orRequest("patch", `/bookings/${id}`, { data: fields });
+        return `Booking ${id} updated.\n${formatResponse(data)}`;
+      });
     }
   );
 

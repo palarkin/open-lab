@@ -87,14 +87,21 @@ otherwise).
 
 | Area | Tools |
 |------|-------|
-| Properties | `list_properties`, `get_property` |
-| Bookings | `list_bookings`, `get_booking`, `get_schedule` (arrivals / departures / turnovers for a range) |
-| Owners & statements | `list_owners`, `get_owner`, `list_owner_statements`, `get_owner_statement` (official statement first, synthesized fallback) |
-| Guests | `search_guests`, `get_guest` |
+| Properties | `list_properties`, `get_property`, `search_available_properties` |
+| Bookings | `list_bookings`, `get_booking`, `get_schedule` (arrivals / departures / turnovers), `update_booking` *(write)* |
+| Owners & statements | `list_owners`, `get_owner`, `list_owner_statements`, `get_owner_statement` (official first, synthesized fallback) |
+| Guests | `search_guests`, `get_guest`, `create_guest` *(write)*, `update_guest` *(write)* |
 | Inquiries (leads) | `list_inquiries`, `get_inquiry` (carry `thread_ids` — the entry point to messaging) |
-| Finance | `list_payments`, `list_deposits`, `list_refunds` |
+| Quotes | `list_quotes`, `get_quote`, `create_quote` *(write)*, `update_quote` *(write)*, `delete_quote` *(write)* |
+| Finance | `list_payments`, `get_payment`, `list_deposits`, `get_deposit`, `list_refunds`, `get_refund` |
 | Calendar / rates | `get_availability`, `update_rate` *(write)* |
+| Reviews & listings | `list_reviews`, `get_review`, `list_listings`, `list_listing_sites` |
+| Pricing config | `list_surcharges`, `list_discounts`, `list_fees` |
+| Tags | `list_entity_tags`, `list_tag_definitions`, `tag_entity` *(write)*, `untag_entity` *(write)* |
+| Account | `whoami` |
 | Messaging *(OAuth)* | `list_thread_messages`, `get_message`, `send_message` *(write)* |
+
+See [`ROADMAP.md`](ROADMAP.md) for the full endpoint→tool coverage table.
 
 ## Prompts
 

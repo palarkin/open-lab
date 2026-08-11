@@ -10,6 +10,9 @@ import { registerCalendarTools } from "./tools/calendar.js";
 import { registerGuestTools } from "./tools/guests.js";
 import { registerFinanceTools } from "./tools/finance.js";
 import { registerInquiryTools } from "./tools/inquiries.js";
+import { registerCatalogTools } from "./tools/catalog.js";
+import { registerQuoteTools } from "./tools/quotes.js";
+import { registerTagTools } from "./tools/tags.js";
 import { registerPrompts } from "./tools/prompts.js";
 
 export function buildServer(): McpServer {
@@ -22,6 +25,9 @@ export function buildServer(): McpServer {
   registerGuestTools(server);
   registerFinanceTools(server);
   registerInquiryTools(server);
+  registerCatalogTools(server);
+  registerQuoteTools(server);
+  registerTagTools(server);
   registerPrompts(server);
   return server;
 }

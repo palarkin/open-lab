@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { orPaged, formatResponse, handleError } from "../services/ownerrez-client.js";
 import { zDate } from "../logic.js";
+import { registerReadById } from "./_util.js";
 
 const READ = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true };
 
@@ -39,4 +40,7 @@ export function registerFinanceTools(server: McpServer) {
   financeTool(server, "ownerrez_list_payments", "/payments", "List Payments", "payments (guest → you)");
   financeTool(server, "ownerrez_list_deposits", "/deposits", "List Deposits", "deposits (payouts grouping)");
   financeTool(server, "ownerrez_list_refunds", "/refunds", "List Refunds", "refunds");
+  registerReadById(server, { name: "ownerrez_get_payment", title: "Get Payment", description: "Fetch a single payment by id.", path: "/payments" });
+  registerReadById(server, { name: "ownerrez_get_deposit", title: "Get Deposit", description: "Fetch a single deposit by id.", path: "/deposits" });
+  registerReadById(server, { name: "ownerrez_get_refund", title: "Get Refund", description: "Fetch a single refund by id.", path: "/refunds" });
 }
