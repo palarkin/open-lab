@@ -7,14 +7,20 @@ Full design/decision record: [`BLUEPRINT.md`](BLUEPRINT.md).
 
 ## Setup
 
-1. **Get a Personal Access Token** — OwnerRez → Settings → Advanced Tools → Developer/API Settings.
+1. **Get just this folder** (no need to clone the whole repo) — one command:
+   ```bash
+   npx degit palarkin/open-lab/MCPs/OwnerRez ownerrez-mcp
+   cd ownerrez-mcp
+   ```
+   (Or clone the whole repo and `cd MCPs/OwnerRez`.)
+2. **Get a Personal Access Token** — OwnerRez → Settings → Advanced Tools → Developer/API Settings.
    Starts with `pt_`.
-2. Copy `.env.example` → `.env` and fill in `OWNERREZ_EMAIL` + `OWNERREZ_TOKEN`.
-3. Live sanity check (no build needed): `node probe.mjs`
-4. Build and register with Claude Code:
+3. Copy `.env.example` → `.env` and fill in `OWNERREZ_EMAIL` + `OWNERREZ_TOKEN`.
+4. Live sanity check (no build needed): `node probe.mjs`
+5. Build and register with Claude Code:
    ```bash
    npm install && npm run build
-   claude mcp add ownerrez --scope user -- node /absolute/path/to/ownerrez-mcp/dist/index.js
+   claude mcp add ownerrez --scope user -- node "$(pwd)/dist/index.js"
    ```
    Fully quit and reopen Claude Code to load it.
 
