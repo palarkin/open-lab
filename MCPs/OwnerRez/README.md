@@ -1,77 +1,126 @@
-# OwnerRez MCP Server
+# OwnerRez + Claude (OwnerRez MCP Server)
 
-An MCP server that exposes the OwnerRez API v2 (plus genuine owner statements and messaging) to
-Claude — over stdio locally, or HTTP for remote/hosted use. 21 tools + 3 canned prompts.
+This lets you **talk to your OwnerRez account using Claude, in plain English.** Once it's set up,
+you can ask things like:
 
-Full design/decision record: [`BLUEPRINT.md`](BLUEPRINT.md).
+- "Who's checking in this week?"
+- "How much did I make this month?"
+- "Show me the owner statement for Jane Smith."
+- "Which properties had the most bookings in the last 30 days?"
 
-## Setup
+You don't need to be technical. Just follow the steps below in order. It takes about 15 minutes.
 
-1. **Get just this folder** (no need to clone the whole repo) — one command:
-   ```bash
-   npx degit palarkin/open-lab/MCPs/OwnerRez ownerrez-mcp
-   cd ownerrez-mcp
-   ```
-   (Or clone the whole repo and `cd MCPs/OwnerRez`.)
-2. **Get a Personal Access Token** — OwnerRez → Settings → Advanced Tools → Developer/API Settings.
-   Starts with `pt_`.
-3. Copy `.env.example` → `.env` and fill in `OWNERREZ_EMAIL` + `OWNERREZ_TOKEN`.
-4. Live sanity check (no build needed): `node probe.mjs`
-5. Build and register with Claude Code:
-   ```bash
-   npm install && npm run build
-   claude mcp add ownerrez --scope user -- node "$(pwd)/dist/index.js"
-   ```
-   Fully quit and reopen Claude Code to load it.
+---
 
-## Auth modes
+## Before you start, you need three things
 
-The client picks auth automatically:
+1. **An OwnerRez account** (with admin access, so you can create a key).
+2. **Claude Desktop** — the free app. Download it here: https://claude.ai/download
+3. **Node.js** — a free tool that runs this program. Download the "LTS" version here:
+   https://nodejs.org — click the big button, open the file, and click through the installer.
 
-- **Personal Access Token (default)** — HTTP Basic, username = OwnerRez email, password = `pt_` token.
-  Covers everything **except messaging**.
-- **OAuth-app token (optional)** — set `OWNERREZ_OAUTH_TOKEN` (`at_…`) + `OWNERREZ_APP_UA`. Used
-  instead of the PAT for API calls, and **required for messaging** (PATs get `402 messaging_not_enabled`).
-  Create an OAuth app + "Grant Access To Me", then exchange the code with `node oauth-setup.mjs`.
-  The legacy owner-statements endpoint always prefers the PAT.
+> **What's the "Terminal"?** It's an app on your computer where you type commands. On a Mac, press
+> `Cmd + Space`, type **Terminal**, and press Enter. On Windows, search for **PowerShell**. You'll
+> paste a few commands into it below — just copy, paste, and press Enter.
 
-## Tools (21)
+---
 
-**Properties** — `list_properties`, `get_property`
-**Bookings** — `list_bookings`, `get_booking`, `get_schedule` (arrivals/departures/turnovers for a range)
-**Owners & statements** — `list_owners`, `get_owner`, `list_owner_statements` (official), `get_owner_statement` (official-first, synthesizes as fallback)
-**Guests** — `search_guests`, `get_guest`
-**Inquiries (leads)** — `list_inquiries`, `get_inquiry` (carry `thread_ids` → the door to messaging)
-**Finance** — `list_payments`, `list_deposits`, `list_refunds`
-**Calendar / rates** — `get_availability`, `update_rate` *(write, `confirm`-gated)*
-**Messaging** *(OAuth only)* — `list_thread_messages`, `get_message`, `send_message` *(write, `confirm`-gated)*
+## Step 1 — Download this program
 
-Read tools return a compact view by default; pass `full: true` for every field, `limit` to cap.
-Write tools change nothing unless called with `confirm: true`.
-
-## Prompts (3)
-
-`weekly_turnover_briefing`, `monthly_owner_statement`, `unanswered_inquiries` — one-click workflows.
-
-## Remote / HTTP mode (scaffolded)
-
-`src/http.ts` serves the same tools over HTTP with a bearer-token gate, for cloud hosting so a
-Claude custom connector (incl. mobile) can reach it. Requires `MCP_AUTH_TOKEN`; run with
-`npm run start:http`. Not yet deployed — see BLUEPRINT.
-
-## Development
+Paste this into your Terminal and press Enter:
 
 ```bash
-npm run build     # tsc → dist/
-npm test          # build + unit tests (pure logic in src/logic.ts)
-npm run smoke     # live API smoke test (needs .env)
-npm run dev       # run stdio server via tsx (no build)
+npx degit palarkin/open-lab/MCPs/OwnerRez OwnerRez-MCP
+cd OwnerRez-MCP
 ```
 
-Pure, network-free logic lives in `src/logic.ts` and is unit-tested in `src/logic.test.ts`
-(statement aggregation, schedule bucketing, pagination normalization, date validation).
+This downloads just this program (not the rest of the repo) into a folder and moves you into it.
+If it asks to install `degit`, type `y` and press Enter.
 
-## Security
+## Step 2 — Get your OwnerRez key
 
-`.env` is gitignored — never commit it. The OAuth `at_` token grants full account access; treat it
-like a password, and revoke/reissue in OwnerRez if it leaks.
+1. Log in to OwnerRez.
+2. Go to **Settings → Advanced Tools → Developer/API Settings**.
+3. Click **Create Personal Access Token**, give it any name (like "Claude"), and create it.
+4. **Copy the token** — it starts with `pt_`. You only see it once, so copy it now.
+
+## Step 3 — Add your email and key
+
+In your Terminal, paste this to create your settings file:
+
+```bash
+cp .env.example .env
+open -e .env      # on Windows use:  notepad .env
+```
+
+A text editor will open. Fill in the two lines with **your** OwnerRez email and the `pt_` key you
+just copied, so they look like this:
+
+```
+OWNERREZ_EMAIL=you@example.com
+OWNERREZ_TOKEN=pt_your_key_here
+```
+
+Save the file and close it. (This file stays on your computer and is never shared.)
+
+## Step 4 — Set it up
+
+Paste these two commands (one at a time) and press Enter after each:
+
+```bash
+npm install
+npm run build
+```
+
+The first downloads what the program needs; the second gets it ready to run. Wait for each to
+finish.
+
+**Check it works:** paste `node probe.mjs` and press Enter. You should see `✅ Auth OK` with your
+account name. If you do, everything's connected correctly. 🎉
+
+## Step 5 — Connect it to Claude
+
+Paste this **exactly** — it plugs the program into Claude:
+
+```bash
+claude mcp add ownerrez --scope user -- node "$(pwd)/dist/index.js"
+```
+
+Then **fully quit Claude Desktop and reopen it** (don't just close the window).
+
+> **Prefer to use the Claude Desktop app's settings instead?** You can add it there under
+> Settings → Connectors/MCP, pointing to the file path that `pwd` shows you followed by
+> `/dist/index.js`. The command above is the easy way if you have the Claude command installed.
+
+## Step 6 — Try it!
+
+In Claude, type something like:
+
+> *"Using OwnerRez, who is checking in this week?"*
+
+That's it — you're done.
+
+---
+
+## If something goes wrong
+
+- **`node` or `git` "command not found"** → Node.js (or Git) isn't installed. Install Node.js from
+  https://nodejs.org and try again.
+- **`probe.mjs` shows a 401 error** → your email or key is wrong. Re-check the two lines in your
+  `.env` file (the key must start with `pt_`), or make a new key in OwnerRez.
+- **Claude doesn't see the tools** → make sure you fully **quit and reopened** Claude, and that
+  Step 4 finished without errors.
+
+## Good to know
+
+- Your key and email live only in the `.env` file on your computer. They are never uploaded or
+  shared.
+- Anything that would *change* your data (like updating a rate) always asks you to confirm first —
+  it won't change anything on its own.
+- **Guest messaging** needs a bit of extra setup (an OwnerRez "OAuth app"); everything else works
+  with just the key above. See `BLUEPRINT.md` if you want the details.
+
+## For developers
+
+See [`BLUEPRINT.md`](BLUEPRINT.md) for the architecture, the full list of tools, remote/HTTP
+hosting, and how to run the tests (`npm test`).
