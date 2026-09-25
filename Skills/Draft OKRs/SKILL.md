@@ -1,13 +1,12 @@
 ---
 name: draft-okrs
-description: Use when someone asks to draft their OKRs, help write OKRs, structure objectives and key results, or build quarterly goals in StackAdapt's format. Triggers on "draft my OKRs", "help me write OKRs", "build my quarterly goals", "structure my objectives", or /draft-okrs.
+description: Use when someone asks to draft their OKRs, help write OKRs, structure objectives and key results, or build quarterly goals. Triggers on "draft my OKRs", "help me write OKRs", "build my quarterly goals", "structure my objectives", or /draft-okrs.
 argument-hint: [team | individual]
 ---
 
 ## What This Skill Does
 
-Interviews the user one question at a time and turns their answers into well-formed OKRs
-matching StackAdapt's house format. Acts as a **quality gate**: it refuses to emit task-based
+Interviews the user one question at a time and turns their answers into well-formed OKRs. Acts as a **quality gate**: it refuses to emit task-based
 objectives or unscoreable key results, coaching the user to fix them using the rubric's
 good/bad examples before finalizing.
 
